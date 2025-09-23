@@ -16,7 +16,13 @@ from pathlib import Path
 # the newest OpenAI model is "gpt-4o" which was released May 13, 2024.
 # do not change this unless explicitly requested by the user
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
-openai_client = OpenAI(api_key=OPENAI_API_KEY)
+
+# Initialize OpenAI client with error handling
+openai_client = None
+if OPENAI_API_KEY:
+    openai_client = OpenAI(api_key=OPENAI_API_KEY)
+else:
+    print("Warning: OPENAI_API_KEY not found. Analysis features will be disabled.")
 
 FRONTEND_DIR = Path(__file__).resolve().parent.parent / "frontend"
 
@@ -98,6 +104,17 @@ def process_image_bytes(image_bytes: bytes) -> str:
 
 def analyze_car_damage(base64_image: str) -> CarAnalysisResponse:
     """Analyze car damage using OpenAI GPT-4o vision"""
+    if not openai_client:
+        return CarAnalysisResponse(
+            make="Unknown",
+            model="Unknown",
+            color="Unknown",
+            damage_summary="OpenAI API key not configured. Please set OPENAI_API_KEY environment variable.",
+            repair_cost_estimate="Unable to estimate without API key",
+            success=False,
+            error="OpenAI API key not configured"
+        )
+    
     try:
         system_prompt = """You are an expert automotive insurance adjuster with extensive vehicle identification experience. Analyze this car image carefully.
 
