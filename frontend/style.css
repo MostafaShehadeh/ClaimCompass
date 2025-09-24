@@ -1,21 +1,36 @@
-/* ClaimCompass Frontend Styles */
+/* Scale AI Inspired Frontend Styles */
+
+:root {
+    /* Scale AI Brand Colors */
+    --scale-primary: #1E3A8A;     /* Deep blue */
+    --scale-secondary: #3B82F6;   /* Bright blue */
+    --scale-accent: #10B981;      /* Green accent */
+    --scale-text: #111827;        /* Almost black */
+    --scale-text-light: #6B7280;  /* Gray text */
+    --scale-background: #FFFFFF;  /* White */
+    --scale-surface: #F9FAFB;     /* Light gray surface */
+    --scale-border: #E5E7EB;      /* Light border */
+}
 
 body {
-    background-color: #ffffff;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    color: #2d3748;
+    background: linear-gradient(135deg, #F9FAFB 0%, #F3F4F6 100%);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    color: var(--scale-text);
     line-height: 1.6;
+    min-height: 100vh;
 }
 
 .upload-area {
-    border: 2px dashed #e2e8f0;
-    border-radius: 12px;
-    padding: 2.5rem 1.5rem;
+    border: 2px dashed var(--scale-border);
+    border-radius: 16px;
+    padding: 3rem 2rem;
     text-align: center;
-    transition: all 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     cursor: pointer;
-    background-color: #f8fafc;
+    background: var(--scale-surface);
     user-select: none;
+    position: relative;
+    overflow: hidden;
 }
 
 .upload-area * {
@@ -23,21 +38,25 @@ body {
 }
 
 .upload-area:hover {
-    border-color: #4f46e5;
-    background-color: #f0f3ff;
+    border-color: var(--scale-primary);
+    background: linear-gradient(135deg, #EBF8FF 0%, #DBEAFE 100%);
     transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(30, 58, 138, 0.1);
 }
 
 .upload-area.dragover {
-    border-color: #4f46e5;
-    background-color: #e0e7ff;
+    border-color: var(--scale-secondary);
+    background: linear-gradient(135deg, #DBEAFE 0%, #BFDBFE 100%);
     transform: scale(1.02);
+    box-shadow: 0 20px 40px rgba(59, 130, 246, 0.2);
 }
 
 .card {
-    border: none;
-    border-radius: 16px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    border: 1px solid var(--scale-border);
+    border-radius: 20px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    background: var(--scale-background);
+    backdrop-filter: blur(10px);
 }
 
 .btn {
@@ -48,26 +67,32 @@ body {
 }
 
 .btn-primary {
-    background: #4f46e5;
+    background: linear-gradient(135deg, var(--scale-primary) 0%, var(--scale-secondary) 100%);
     border: none;
     color: white;
+    font-weight: 600;
+    letter-spacing: 0.025em;
 }
 
 .btn-primary:hover {
-    background: #4338ca;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+    background: linear-gradient(135deg, #1E40AF 0%, #2563EB 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(30, 58, 138, 0.25);
 }
 
 .btn-outline-primary {
-    border-color: #4f46e5;
-    color: #4f46e5;
+    border-color: var(--scale-primary);
+    color: var(--scale-primary);
+    font-weight: 600;
+    background: transparent;
 }
 
 .btn-outline-primary:hover {
-    background: #4f46e5;
-    border-color: #4f46e5;
+    background: var(--scale-primary);
+    border-color: var(--scale-primary);
     color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(30, 58, 138, 0.2);
 }
 
 .btn-sm {
@@ -103,7 +128,15 @@ body {
 }
 
 .text-primary {
-    color: #4f46e5 !important;
+    color: var(--scale-primary) !important;
+}
+
+.scale-gradient-text {
+    background: linear-gradient(135deg, var(--scale-primary) 0%, var(--scale-secondary) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 700;
 }
 
 /* Result Components */
@@ -124,20 +157,23 @@ body {
 
 /* Form Elements */
 .form-label {
-    color: #374151;
+    color: var(--scale-text);
     margin-bottom: 0.5rem;
+    font-weight: 600;
 }
 
 .form-control {
-    border: 1px solid #e2e8f0;
-    border-radius: 8px;
-    padding: 0.75rem;
-    transition: all 0.2s ease;
+    border: 1px solid var(--scale-border);
+    border-radius: 12px;
+    padding: 1rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    background: var(--scale-background);
 }
 
 .form-control:focus {
-    border-color: #4f46e5;
-    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+    border-color: var(--scale-secondary);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    outline: none;
 }
 
 /* Animation for results appearance */
