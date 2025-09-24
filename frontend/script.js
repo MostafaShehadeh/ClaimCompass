@@ -1,6 +1,6 @@
-// ClaimCompass Frontend JavaScript
+// Scale AI Car Damage Analysis Frontend
 
-// Configuration - Same origin requests (no cross-origin issues)
+// Configuration
 const API_BASE_URL = '';
 const API_ENDPOINT = '/api/analyze';
 
@@ -16,10 +16,9 @@ const urlPreviewImage = document.getElementById('urlPreviewImage');
 const urlPreview = document.getElementById('urlPreview');
 const analysisForm = document.getElementById('analysisForm');
 const analyzeBtn = document.getElementById('analyzeBtn');
-const loadingCard = document.getElementById('loadingCard');
-const resultsCard = document.getElementById('resultsCard');
-const errorCard = document.getElementById('errorCard');
-const welcomeCard = document.getElementById('welcomeCard');
+const loadingSection = document.getElementById('loadingSection');
+const resultsSection = document.getElementById('resultsSection');
+const errorSection = document.getElementById('errorSection');
 
 // Initialize event listeners
 document.addEventListener('DOMContentLoaded', function() {
@@ -46,23 +45,23 @@ function setupEventListeners() {
 }
 
 function handleUploadAreaClick(event) {
-    // Simple click handler - just trigger file input
-    fileInput.click();
+    if (event.target === uploadArea || uploadArea.contains(event.target)) {
+        fileInput.click();
+    }
 }
 
 async function checkAPIConnection() {
     try {
-        console.log('Attempting to connect to API...');
+        console.log('Connecting to Scale AI backend...');
         const response = await fetch('/health');
         const data = await response.json();
         if (response.ok && data.status === 'healthy') {
-            console.log('API connected successfully:', data.service);
+            console.log('Scale AI backend connected successfully:', data.service);
         } else {
             console.warn('API health check failed:', data);
         }
     } catch (error) {
         console.warn('API connection failed:', error);
-        // Don't show error immediately on page load
     }
 }
 
@@ -81,7 +80,9 @@ function handleDragOver(event) {
 
 function handleDragLeave(event) {
     event.preventDefault();
-    uploadArea.classList.remove('dragover');
+    if (!uploadArea.contains(event.relatedTarget)) {
+        uploadArea.classList.remove('dragover');
+    }
 }
 
 function handleDrop(event) {
@@ -96,14 +97,14 @@ function handleDrop(event) {
             clearUrl();
             previewFile(file);
         } else {
-            showError('Please drop an image file');
+            showError('Please drop an image file (JPG, PNG)');
         }
     }
 }
 
 function previewFile(file) {
     if (!file.type.startsWith('image/')) {
-        showError('Please select an image file');
+        showError('Please select an image file (JPG, PNG)');
         return;
     }
     
@@ -128,7 +129,7 @@ function previewUrl() {
         urlPreview.style.display = 'block';
     };
     urlPreviewImage.onerror = function() {
-        showError('Unable to load image from URL. Please check the URL and try again.');
+        showError('Unable to load image from URL. Please verify the URL is accessible.');
         urlPreview.style.display = 'none';
     };
 }
@@ -158,7 +159,7 @@ async function handleFormSubmit(event) {
     const url = imageUrlInput.value.trim();
     
     if (!file && !url) {
-        showError('Please upload an image file or enter an image URL');
+        showError('Please upload an image file or enter an image URL to analyze');
         return;
     }
     
@@ -200,13 +201,13 @@ async function analyzeImage(file, url) {
             currentAnalysisData = data;
             showResults(data);
         } else {
-            throw new Error(data.error || 'Analysis failed');
+            throw new Error(data.error || 'Analysis failed - please try again');
         }
         
     } catch (error) {
-        console.error('Analysis error:', error);
+        console.error('Scale AI analysis error:', error);
         if (error.message.includes('fetch')) {
-            showError('Unable to connect to the analysis service. Please check if the backend server is running.');
+            showError('Unable to connect to Scale AI services. Please check your connection and try again.');
         } else {
             showError(error.message || 'Failed to analyze image. Please try again.');
         }
@@ -216,20 +217,32 @@ async function analyzeImage(file, url) {
 }
 
 function showLoading() {
-    welcomeCard.style.display = 'none';
-    resultsCard.style.display = 'none';
-    errorCard.style.display = 'none';
-    loadingCard.style.display = 'block';
-    loadingCard.classList.add('pulse');
+    // Hide all sections
+    resultsSection.style.display = 'none';
+    errorSection.style.display = 'none';
+    
+    // Show loading
+    loadingSection.style.display = 'flex';
+    
+    // Update analyze button
     analyzeBtn.disabled = true;
-    analyzeBtn.innerHTML = 'Analyzing...';
+    analyzeBtn.innerHTML = `
+        <div class="loading-spinner" style="width: 16px; height: 16px; margin-right: 8px;"></div>
+        <span class="btn-text">Analyzing with Scale AI...</span>
+    `;
 }
 
 function hideLoading() {
-    loadingCard.style.display = 'none';
-    loadingCard.classList.remove('pulse');
+    loadingSection.style.display = 'none';
+    
+    // Reset analyze button
     analyzeBtn.disabled = false;
-    analyzeBtn.innerHTML = 'Analyze Damage';
+    analyzeBtn.innerHTML = `
+        <span class="btn-text">Analyze with Scale AI</span>
+        <svg class="btn-arrow" width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+            <path d="M3.204 11L6.5 7.704 3.204 4.408l.592-.592L8 7.716l.592.592-4.796 4.796L3.204 11z"/>
+        </svg>
+    `;
 }
 
 function showResults(data) {
@@ -240,29 +253,40 @@ function showResults(data) {
     document.getElementById('damageSummary').textContent = data.damage_summary || 'No damage assessment available';
     document.getElementById('repairCost').textContent = data.repair_cost_estimate || 'Unable to estimate';
     
-    // Show results card with animation
-    welcomeCard.style.display = 'none';
-    errorCard.style.display = 'none';
-    resultsCard.style.display = 'block';
-    resultsCard.classList.add('slide-in', 'success-glow');
+    // Hide loading and error
+    loadingSection.style.display = 'none';
+    errorSection.style.display = 'none';
     
-    // Remove animation classes after animation completes
+    // Show results with animation
+    resultsSection.style.display = 'block';
+    resultsSection.classList.add('fade-in');
+    
+    // Remove animation class after animation completes
     setTimeout(() => {
-        resultsCard.classList.remove('slide-in', 'success-glow');
-    }, 1000);
+        resultsSection.classList.remove('fade-in');
+    }, 500);
+    
+    // Scroll to results
+    resultsSection.scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'start' 
+    });
 }
 
 function showError(message) {
     document.getElementById('errorMessage').textContent = message;
     
-    welcomeCard.style.display = 'none';
-    resultsCard.style.display = 'none';
-    errorCard.style.display = 'block';
-    errorCard.classList.add('error-shake');
+    // Hide loading and results
+    loadingSection.style.display = 'none';
+    resultsSection.style.display = 'none';
     
-    // Remove shake animation after it completes
+    // Show error
+    errorSection.style.display = 'flex';
+    errorSection.classList.add('fade-in');
+    
+    // Remove animation class after animation completes
     setTimeout(() => {
-        errorCard.classList.remove('error-shake');
+        errorSection.classList.remove('fade-in');
     }, 500);
     
     hideLoading();
@@ -273,15 +297,28 @@ function resetForm() {
     clearFile();
     clearUrl();
     
-    // Reset UI
+    // Reset data
     currentAnalysisData = null;
-    resultsCard.style.display = 'none';
-    errorCard.style.display = 'none';
-    welcomeCard.style.display = 'block';
+    
+    // Hide all sections
+    resultsSection.style.display = 'none';
+    errorSection.style.display = 'none';
+    loadingSection.style.display = 'none';
     
     // Reset button
     analyzeBtn.disabled = false;
-    analyzeBtn.innerHTML = 'Analyze Damage';
+    analyzeBtn.innerHTML = `
+        <span class="btn-text">Analyze with Scale AI</span>
+        <svg class="btn-arrow" width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+            <path d="M3.204 11L6.5 7.704 3.204 4.408l.592-.592L8 7.716l.592.592-4.796 4.796L3.204 11z"/>
+        </svg>
+    `;
+    
+    // Scroll to top
+    window.scrollTo({ 
+        top: 0, 
+        behavior: 'smooth' 
+    });
 }
 
 function downloadReport() {
@@ -292,6 +329,7 @@ function downloadReport() {
     
     const reportData = {
         timestamp: new Date().toISOString(),
+        service: 'Scale AI Car Damage Analysis',
         vehicle: {
             make: currentAnalysisData.make,
             model: currentAnalysisData.model,
@@ -301,13 +339,16 @@ function downloadReport() {
             summary: currentAnalysisData.damage_summary,
             estimated_cost: currentAnalysisData.repair_cost_estimate
         },
-        analysis_method: 'AI-powered analysis using OpenAI GPT-4o',
+        analysis_method: 'AI-powered analysis using Scale AI and OpenAI GPT-4o',
         disclaimer: 'This is an automated assessment for estimation purposes only. Professional inspection is recommended for accurate damage evaluation.'
     };
     
     const reportText = `
-CLAIMCOMPASS DAMAGE ANALYSIS REPORT
+SCALE AI - VEHICLE DAMAGE ANALYSIS REPORT
 Generated: ${new Date().toLocaleString()}
+
+ANALYSIS SERVICE:
+${reportData.service}
 
 VEHICLE INFORMATION:
 Make: ${reportData.vehicle.make}
@@ -323,19 +364,23 @@ ${reportData.damage.estimated_cost}
 ANALYSIS METHOD:
 ${reportData.analysis_method}
 
-DISCLAIMER:
+IMPORTANT DISCLAIMER:
 ${reportData.disclaimer}
 
+ABOUT SCALE AI:
+Scale delivers breakthrough AI from data to deployment, powering 
+the next generation of AI applications for enterprises and governments.
+
 ---
-Report generated by ClaimCompass
-AI-Powered Insurance Technology Demo
+Report generated by Scale AI Car Damage Analysis
+${new Date().toISOString()}
     `.trim();
     
     const blob = new Blob([reportText], { type: 'text/plain' });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `ClaimCompass_Report_${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.txt`;
+    a.download = `Scale_AI_Vehicle_Analysis_${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.txt`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -350,11 +395,23 @@ function handleFormKeyDown(event) {
     }
 }
 
-// Handle network errors gracefully
+// Handle network status
 window.addEventListener('online', function() {
-    console.log('Connection restored');
+    console.log('Scale AI connection restored');
 });
 
 window.addEventListener('offline', function() {
     showError('No internet connection. Please check your network and try again.');
 });
+
+// Add some Scale AI branding touches
+console.log('Scale AI Car Damage Analysis - Breakthrough AI from Data to Deployment');
+console.log('Powered by Scale AI and OpenAI GPT-4o');
+
+// Export functions for testing
+window.ScaleAI = {
+    analyzeImage,
+    resetForm,
+    downloadReport,
+    previewUrl
+};
